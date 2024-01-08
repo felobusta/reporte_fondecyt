@@ -284,5 +284,5 @@ participants$peligro_participacion_2 <- participants$peligro_2 + participants$pe
 ```
 
 
-Respecto a los participantes con peligro que quedar fuera del estudio debido a los tiempos transcurridos entre los examenes **`r n_peligro` deberan ser retirados por superar los 120 días**. La Tabla 2 indica el participante y el tiempo para finalizar el proceso de examenes.
+Respecto a los participantes con peligro que quedar fuera del estudio debido a los tiempos transcurridos entre los examenes **`r n_peligro` deberan ser retirados por superar los 120 días**.
 
