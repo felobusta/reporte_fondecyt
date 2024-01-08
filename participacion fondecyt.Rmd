@@ -6,9 +6,11 @@ output:
   word_document:
     reference_docx: "template.docx"
 
+#template descargable en: https://docs.google.com/document/d/1kRCM6_NsH8txpwUlFk_n9fd74nZazUfb/edit?usp=sharing&ouid=106562740857210924593&rtpof=true&sd=true
+
 ---
 
-## Reporte de avance FONDECYT Regular 1210176: Natural speech markers of neurodegeneration: An interdisciplinary approach for disease discrimination and symptom tracking
+## Reporte de avance FONDECYT Regular 121017X
 
 ```{r setup, include=FALSE}
 
