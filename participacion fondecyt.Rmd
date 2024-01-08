@@ -1,0 +1,286 @@
+---
+title: ""
+author: "Felipe Bustamante"
+date: "25 - 07 - 2022"
+output:
+  word_document:
+    reference_docx: "template.docx"
+
+---
+
+## Reporte de avance FONDECYT Regular 1210176: Natural speech markers of neurodegeneration: An interdisciplinary approach for disease discrimination and symptom tracking
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(readxl)
+library(knitr)
+library(flextable)
+participants <- read_excel("C:/Users/fnbus/OneDrive/Escritorio/FONDECYT/actualizaciones/participantes.xlsx")
+n_participants <- nrow(participants);n_participants
+participants <- participants %>% filter(acepta_participar=="Si")
+
+control_completos <- ifelse(nrow(participants[participants$tipo_paciente=="Control" &
+                                                participants$clinica_neuro == "Si" & 
+                                                participants$eeg == "Completa" & 
+                                                participants$mri == "Completa",]) > 0,
+                                   sprintf("%d controles,", 
+                                           nrow(participants[participants$tipo_paciente=="Control" &
+                                                participants$clinica_neuro == "Si" & 
+                                                participants$eeg == "Completa" & 
+                                                participants$mri == "Completa",])),
+                                   "")
+
+alzheimer_completos <- ifelse(nrow(participants[participants$tipo_paciente=="Alzheimer" &
+                                                participants$clinica_neuro == "Si" & 
+                                                participants$eeg == "Completa" & 
+                                                participants$mri == "Completa",]) > 0,
+                                   sprintf("%d Alzheimer,", 
+                                           nrow(participants[participants$tipo_paciente=="Alzheimer" &
+                                                participants$clinica_neuro == "Si" & 
+                                                participants$eeg == "Completa" & 
+                                                participants$mri == "Completa",])),
+                                   "")
+
+dft_completos <- ifelse(nrow(participants[participants$tipo_paciente=="DFT" &
+                                                participants$clinica_neuro == "Si" & 
+                                                participants$eeg == "Completa" & 
+                                                participants$mri == "Completa",]) > 0,
+                                   sprintf("%d DFT,", 
+                                           nrow(participants[participants$tipo_paciente=="DFT" &
+                                                participants$clinica_neuro == "Si" & 
+                                                participants$eeg == "Completa" & 
+                                                participants$mri == "Completa",])),
+                                   "")
+
+
+parkinson_completos <- ifelse(nrow(participants[participants$tipo_paciente=="Parkinson" &
+                                                participants$clinica_neuro == "Si" & 
+                                                participants$eeg == "Completa" & 
+                                                participants$mri == "Completa",]) > 0,
+                                   sprintf("%d Parkinson,", 
+                                           nrow(participants[participants$tipo_paciente=="Parkinson" &
+                                                participants$clinica_neuro == "Si" & 
+                                                participants$eeg == "Completa" & 
+                                                participants$mri == "Completa",])),
+                                   "0 Parkinson")
+
+sin_tareasA <- ifelse(
+  nrow(participants[participants$tipo_paciente=="Alzheimer"  & 
+                      participants$clinica_neuro == "Pendiente" & 
+                      participants$eeg == "Pendiente coordinación" & 
+                      participants$mri == "Pendiente coordinación",])>0,
+  sprintf("%d Alzheimer,",nrow(participants[participants$tipo_paciente=="Alzheimer"  & 
+                      participants$clinica_neuro == "Pendiente" & 
+                      participants$eeg == "Pendiente coordinación" & 
+                      participants$mri == "Pendiente coordinación",])),
+  "")
+
+
+sin_tareasB <- ifelse(
+  nrow(participants[participants$tipo_paciente=="Control"  & 
+                      participants$clinica_neuro == "Pendiente" & 
+                      participants$eeg == "Pendiente coordinación" & 
+                      participants$mri == "Pendiente coordinación",])>0,
+  sprintf("%d Control,",nrow(participants[participants$tipo_paciente=="Control"  & 
+                      participants$clinica_neuro == "Pendiente" & 
+                      participants$eeg == "Pendiente coordinación" & 
+                      participants$mri == "Pendiente coordinación",])),
+  "")
+
+sin_tareasC <- ifelse(
+  nrow(participants[participants$tipo_paciente=="Parkinson"  & 
+                      participants$clinica_neuro == "Pendiente" & 
+                      participants$eeg == "Pendiente coordinación" & 
+                      participants$mri == "Pendiente coordinación",])>0,
+  sprintf("%d Parkinson,",nrow(participants[participants$tipo_paciente=="Parkinson"  & 
+                      participants$clinica_neuro == "Pendiente" & 
+                      participants$eeg == "Pendiente coordinación" & 
+                      participants$mri == "Pendiente coordinación",])),
+  "")
+
+sin_tareasD <- ifelse(
+  nrow(participants[participants$tipo_paciente=="DFT"  & 
+                      participants$clinica_neuro == "Pendiente" & 
+                      participants$eeg == "Pendiente coordinación" & 
+                      participants$mri == "Pendiente coordinación",])>0,
+  sprintf("%d DFT,",nrow(participants[participants$tipo_paciente=="DFT"  & 
+                      participants$clinica_neuro == "Pendiente" & 
+                      participants$eeg == "Pendiente coordinación" & 
+                      participants$mri == "Pendiente coordinación",])),
+  "")
+
+
+```
+
+Breve resumen tablas: 
+
+\justify 
+Existen `r nrow(participants)` participantes que han aceptado ser parte del proceso, de los cuales `r sum(participants$clinica_neuro == "Si" & participants$eeg == "Completa" & participants$mri == "Completa")` ya lo han completado (`r control_completos` `r alzheimer_completos` `r dft_completos` `r parkinson_completos`). Existen `r sum(participants$clinica_neuro == "Pendiente" & participants$eeg == "Pendiente coordinación" & participants$mri == "Pendiente coordinación")` participantes (`r sin_tareasA` `r sin_tareasB` `r sin_tareasC` `r sin_tareasD`) que no han iniciado actividades.
+
+```{r actividad avance,include=FALSE}
+
+# Count the occurrences of each activity
+actividades_conteo <- participants %>% summarise(`Evaluaciones clínicas`=sum(clinica_neuro =="Si"),
+                                                 Electroencefalograma =sum(eeg =="Completa"),
+                                                 `Resonancias magnéticas` = sum(mri =="Completa"))
+
+# Find the fastest activity
+fastest_activity <- names(actividades_conteo)[which.max(unlist(actividades_conteo))]
+
+setdiff(names(actividades_conteo), fastest_activity)->diferencias
+
+# Display the results
+result_message <- sprintf("El %s es la actividad en la que más rápido se ha avanzado, seguido de %s y luego %s.",fastest_activity, diferencias[1], diferencias[2])
+
+result_message
+
+ultima_actualizacion <- "14-07-2022"
+
+ultima_actualizacion_2 <- "2022-07-14"
+
+participants %>% 
+  filter(fecha_clinica >= ultima_actualizacion_2,
+           fecha_eeg>= ultima_actualizacion_2,
+           fecha_mri >= ultima_actualizacion_2) %>% 
+  summarise(sum(clinica_neuro=="Si" &
+                  eeg == "Completa" & 
+                  mri =="Completa"))->nuevos_completos;nuevos_completos
+  
+participants %>% 
+  filter(fecha_clinica >= ultima_actualizacion_2) %>% 
+  summarise(sum(clinica_neuro=="Si"))->nuevos_evaluacion;nuevos_evaluacion
+
+participants %>% 
+  filter(fecha_eeg>= ultima_actualizacion_2) %>%  
+  summarise(sum(eeg=="Completa"))->nuevos_eeg;nuevos_eeg
+
+participants %>% 
+  filter(fecha_mri >= ultima_actualizacion_2) %>% 
+  summarise(sum(mri=="Completa"))->nuevos_mri;nuevos_mri
+
+# proceso complet
+mensaje_A <- participants %>%
+  filter(fecha_clinica > ultima_actualizacion_2,
+         fecha_eeg     > ultima_actualizacion_2,
+         fecha_mri     > ultima_actualizacion_2)
+
+
+mensaje_completos <- ifelse(nrow(mensaje_A) > 0,
+                                   sprintf("%d participants completaron el proceso,", 
+                                           nrow(mensaje_A)),
+                                   "no existen nuevos participantes que hayan completado el proceso.")
+
+# evaluación clínica
+mensaje_B <- participants %>%
+  filter(fecha_clinica > ultima_actualizacion_2)
+
+mensaje_evaluacion <- ifelse(nrow(mensaje_B) > 0,
+                                   sprintf("Asimismo, %d nuevos participantes completaron su evaluación clínica,",
+                                           nrow(mensaje_B)),
+                             "Asimismo, no existen nuevos participantes que hayan realizado su evaluación clínica,")
+
+
+
+mensaje_C <- participants %>%
+  filter(fecha_eeg > ultima_actualizacion_2)
+
+mensaje_eeg <- ifelse(nrow(mensaje_C) > 0,
+                                   sprintf("%d nuevos participantes completaron su Electroencefalograma",
+                                           nrow(mensaje_C)),
+                             "No existen nuevos participantes que hayan realizado su Electroencefalograma")
+
+mensaje_D <- participants %>%
+  filter(fecha_mri > ultima_actualizacion_2)
+
+mensaje_mri <- ifelse(nrow(mensaje_D) > 0,
+                                   sprintf("y %d nuevos participantes completaron su Resonancia Magnética.",
+                                           nrow(mensaje_D)),
+                             "y no existen nuevos participantes que hayan realizado su Resonancia Magnética.")
+
+
+paste("Desde la actualización del",ultima_actualizacion,mensaje_completos,mensaje_evaluacion,mensaje_eeg,mensaje_mri)->mensaje_ultimafecha
+
+#Respecto de la actualización al día `r ultima_actualizacion`, `r nuevos_completos` participantes adicionales #completaron el proceso, 1 nuevo participante Parkinson ha sido reclutado, se realizaron 3 nuevas evaluaciones y #4 nuevos EEG.
+
+```
+
+`r result_message` 
+
+`r mensaje_ultimafecha` 
+
+Adicionalmente, se cuenta con aproximadamente 40 contactos de nuevos potenciales participantes Parkinson, pero estos no han sido contactados considerando la problemática asociada a las resonancias magnéticas. 
+
+
+```{r actividad tabla 1,include=FALSE}
+
+tabla_1A <- participants %>% 
+  group_by(`Tipo paciente`=tipo_paciente) %>% 
+  summarise(Cantidad=n(),
+            `Eval Neuro` = sum(clinica_neuro=="Si"),
+            EEG = sum(eeg=="Completa"),
+            MRI = sum(mri=="Completa"),
+            Completos = sum(clinica_neuro=="Si" & 
+                              eeg == "Completa" &
+                              mri == "Completa"));tabla_1A
+
+tabla_1B <- tabla_1A %>% 
+  summarise(`Tipo paciente`="Total",
+            Cantidad=sum(Cantidad),
+            `Eval Neuro` = sum(`Eval Neuro`),
+            EEG = sum(EEG),
+            MRI = sum(MRI),
+            Completos = sum(Completos));tabla_1B
+
+tabla_1final <- rbind(tabla_1A,tabla_1B);tabla_1final
+
+kable(tabla_1final, caption = "Tabla 1. Participantes según actividades.")
+
+
+```
+
+
+
+
+
+``` {r show table,echo=FALSE}
+#kable(tabla_1final, caption = "Tabla 1. Participantes según actividades.")
+    
+```
+``` {r show table 2,echo=FALSE}
+flextable(tabla_1final)%>% 
+  set_table_properties(layout = "autofit") %>% 
+  theme_vanilla() %>% 
+  color(part = "header", color = "#666666") %>% 
+  set_caption(caption = "Tabla 1. Participantes según actividades")->ft
+ft
+
+
+``` 
+
+
+``` {r peligro de quedar fuera,echo=FALSE}
+
+
+participants$fecha_clinica[is.na(participants$fecha_clinica)] <- Sys.Date()
+participants$fecha_eeg[is.na(participants$fecha_eeg)] <- Sys.Date()
+participants$fecha_mri[is.na(participants$fecha_mri)] <- Sys.Date()
+
+participants$peligro_1 <- ifelse(!is.na(participants$fecha_clinica) & 
+                                   !is.na(participants$fecha_eeg), abs(difftime(participants$fecha_eeg, participants$fecha_clinica, units = "days")), NA)
+
+participants$peligro_2 <-  ifelse(!is.na(participants$fecha_eeg) & 
+                                   !is.na(participants$fecha_mri), abs(difftime(participants$fecha_mri, participants$fecha_eeg, units = "days")), NA)
+
+participants$peligro_participacion <- ifelse(participants$peligro_2 + participants$peligro_1 > 120, TRUE, FALSE)
+
+nrow(participants[participants$peligro_participacion==TRUE,]) -> n_peligro
+
+participants$peligro_participacion_2 <- participants$peligro_2 + participants$peligro_1
+
+
+```
+
+
+Respecto a los participantes con peligro que quedar fuera del estudio debido a los tiempos transcurridos entre los examenes **`r n_peligro` deberan ser retirados por superar los 120 días**. La Tabla 2 indica el participante y el tiempo para finalizar el proceso de examenes.
+
